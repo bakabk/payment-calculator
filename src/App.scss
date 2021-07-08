@@ -1,0 +1,54 @@
+.App {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 50px 1fr 50px;
+
+  & .app__footer,
+  & .app__header {
+    font-family: sans-serif;
+    font-size: 22px;
+    display: flex;
+  }
+
+  & .app__header {
+    background-color: blueviolet;
+    color: white;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  & .app__body {
+    background-color: darkgray;
+  }
+
+  & .app__footer {
+    background-color: black;
+    color: white;
+    justify-content: space-around;
+    align-items: center;
+  }
+}
+
+.app__body {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+}
+
+.app__body-navigation {
+  border-right: 2px dotted black;
+
+  &-wrapper {
+    list-style: none;
+    padding: 10px;
+  }
+
+  &-wrapper--list {
+    padding: 5px 0;
+    font-size: 14px;
+  }
+}
+
+.app__body-content {
+  padding: 10px;
+  background-color: white;
+}
