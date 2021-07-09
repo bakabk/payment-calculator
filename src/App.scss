@@ -18,7 +18,7 @@
   }
 
   & .app__body {
-    background-color: darkgray;
+    background-color: white;
   }
 
   & .app__footer {
@@ -31,24 +31,11 @@
 
 .app__body {
   display: grid;
-  grid-template-columns: 210px 1fr;
-}
-
-.app__body-navigation {
-  border-right: 2px dotted black;
-
-  &-wrapper {
-    list-style: none;
-    padding: 10px;
-  }
-
-  &-wrapper--list {
-    padding: 5px 0;
-    font-size: 14px;
-  }
+  grid-template-columns: 270px 1fr;
 }
 
 .app__body-content {
+  margin: 20px 10px;
   padding: 10px;
   background-color: white;
 }

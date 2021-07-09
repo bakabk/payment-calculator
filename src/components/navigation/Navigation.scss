@@ -1,0 +1,25 @@
+.navigation {
+  margin: 20px;
+
+  &-wrapper {
+    background-color: #f7f7f7;
+    border-radius: 3px;
+    list-style: none;
+    padding: 10px 15px;
+  }
+
+  &-wrapper--list {
+    padding: 5px 0;
+    font-size: 14px;
+    font-weight: bolder;
+  }
+
+  &-wrapper--list a {
+    text-decoration: none;
+    color: #424242;
+  }
+
+  &-wrapper--list a:hover{
+    color: blueviolet;
+  }
+}
