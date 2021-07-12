@@ -1,6 +1,10 @@
 import React from "react";
 import { FixedSizeGrid as Grid } from 'react-window';
 
+import ReactDOM from 'react-dom';
+import {Column, Table} from 'react-virtualized';
+import 'react-virtualized/styles.css'; // only needs to be imported once
+
 const metersData = [
     {
         id: 0,
@@ -131,21 +135,48 @@ const calcColumnSize = (columns: any): number => {
     return count;
 }
 
+// Table data as an array of objects
+const list = [
+    {name: 'Brian Vaughn', description: 'Software engineer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    {name: 'Yan Cei', description: 'Frontend Developer'},
+    // And so on...
+];
+
 const Statistic: React.FC = () => {
     const size = calcColumnSize(metersData[0]);
 
     return <div>
-        <Grid
-            columnWidth={100}
-            height={150}
-            columnCount={size}
-            rowCount={metersData.length}
-            rowHeight={35}
-            width={900}
-            itemData={metersData}
-        >
-            {Cell}
-        </Grid>
+        {/*<Grid*/}
+        {/*    columnWidth={100}*/}
+        {/*    height={150}*/}
+        {/*    columnCount={size}*/}
+        {/*    rowCount={metersData.length}*/}
+        {/*    rowHeight={35}*/}
+        {/*    width={900}*/}
+        {/*    itemData={metersData}*/}
+        {/*>*/}
+        {/*    {Cell}*/}
+        {/*</Grid>*/}
+        <Table
+            width={300}
+            height={300}
+            headerHeight={20}
+            rowHeight={30}
+            rowCount={list.length}
+            rowGetter={({index}) => list[index]}>
+            <Column label="Name" dataKey="name" width={100} />
+            <Column width={200} label="Description" dataKey="description" />
+        </Table>
     </div>
 }
 
