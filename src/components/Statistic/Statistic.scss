@@ -1,0 +1,18 @@
+.statistic-table {
+  height: 100%;
+
+  &__wrapper {
+    height: 100%;
+  }
+
+  &__header {
+    font-weight: 400;
+    font-size: 12px;
+    text-align: right;
+  }
+
+  &__cell {
+    font-size: 12px;
+    text-align: right;
+  }
+}

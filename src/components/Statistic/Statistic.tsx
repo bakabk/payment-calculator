@@ -1,182 +1,197 @@
 import React from "react";
-import { FixedSizeGrid as Grid } from 'react-window';
+import {Column, Table, AutoSizer} from 'react-virtualized';
 
-import ReactDOM from 'react-dom';
-import {Column, Table} from 'react-virtualized';
 import 'react-virtualized/styles.css'; // only needs to be imported once
+import './Statistic.scss'
 
-const metersData = [
-    {
-        id: 0,
-        title: 'за Декабрь',
-        date: 0,
-        lastMetersData: {
-            water: 0,
-            electricity: 0,
-            gas: true,
-            rent: true,
-            serviceRent: true
-        },
-        currentPrice: {
-            water: 70,
-            electricity: 40,
-            gas: 150,
-            rent: 20000,
-            serviceRent: 1400
-        }
-    }
-];
-
-type metersDataType = {
-    id: number,
-    title: string,
-    date: number,
-    lastMetersData: lastMetersDataType,
-    currentPrice: currentPriceType
+interface IMetersData {
+    id?: number,
+    title?: string,
+    date?: number,
+    waterData?: number,
+    waterPrice?: number,
+    electricityData: number,
+    electricityPrice?: number,
+    gasPrice?: number,
+    rentPrice?: number,
+    serviceRentPrice?: number,
 };
 
-type lastMetersDataType = {
-    water: number,
-    electricity: number,
-    gas: boolean,
-    rent: boolean,
-    serviceRent: boolean
-}
-
-type currentPriceType = {
-    water: number,
-    electricity: number,
-    gas: number,
-    rent: number,
-    serviceRent: number
-}
-
-const defaultPrice = {
-    water: 70,
-    electricity: 40,
-    gas: 150,
-    rent: 20000,
-    serviceRent: 1400
-}
-
-const collumnsMap = ['title', 'date', 'waterData', 'waterPrice',
-    'electricityData', 'electricityPrice', 'gasData', 'gasPrice',
-    'rentData', 'rentPrice', 'serviceRentPrice'];
-
-type cellDataType = {
-    collumn: metersDataType,
-    cellType: string
-}
-
-const cellRenderData = (props: cellDataType): any => {
-    const {cellType, collumn} = props;
-    const {title, date} = collumn;
-    const {water, electricity, gas, rent, serviceRent} = collumn.lastMetersData;
-    const {water: waterPrice, electricity: electricityPrice, gas: gasPrice, rent: rentPrice, serviceRent: serviceRentPrice} = collumn.currentPrice;
-
-    switch (cellType) {
-        case 'title':
-            return <div>{title}</div>
-        case 'date':
-            return <div>{date}</div>
-        case 'waterData':
-            return <div>{water}</div>
-        case 'waterPrice':
-            return <div>{waterPrice}</div>
-        case 'electricityData':
-            return <div>{electricity}</div>
-        case 'electricityPrice':
-            return <div>{electricityPrice}</div>
-        case 'gasData':
-            return <div>{gas}</div>
-        case 'gasPrice':
-            return <div>{gasPrice}</div>
-        case 'rentData':
-            return <div>{rent}</div>
-        case 'rentPrice':
-            return <div>{rentPrice}</div>
-        case 'serviceRentPrice':
-            return <div>{serviceRentPrice}</div>
-        default:
-            return <div>---</div>
+const metersData: Array<IMetersData> = [
+    {
+        id: 0,
+        title: 'за Май',
+        date: 1620301397791,
+        waterData: 10,
+        waterPrice: 70,
+        electricityData: 10,
+        electricityPrice: 40,
+        gasPrice: 150,
+        rentPrice: 20000,
+        serviceRentPrice: 1400
+    },
+    {
+        id: 1,
+        title: 'за Июль',
+        date: 1626361397791,
+        waterData: 15,
+        waterPrice: 70,
+        electricityData: 15,
+        electricityPrice: 40,
+        gasPrice: 150,
+        rentPrice: 20000,
+        serviceRentPrice: 1400
     }
-}
-
-type CellTypes = {
-    data: Array<metersDataType>
-    columnIndex: number,
-    rowIndex: number,
-    style: Object
-}
-
-const Cell = (cellProps: CellTypes) => {
-    const {columnIndex, rowIndex, style, data} = cellProps;
-    const cellData: cellDataType = {
-        cellType: collumnsMap[columnIndex],
-        collumn: data[rowIndex]
-    };
-
-    console.log('cellData', {cellData, cellProps});
-    return <div style={style}>
-        {cellRenderData(cellData)}
-    </div>
-}
-
-const calcColumnSize = (columns: any): number => {
-    const count = Object.keys(columns).reduce((size: number, columnIndex: string): number => {
-        const column = columns[columnIndex];
-        if (typeof(column) !== "string" && Object.keys(column).length) {
-            return size + calcColumnSize(column);
-        } else {
-            return size + 1;
-        }
-    }, 0)
-
-    return count;
-}
-
-// Table data as an array of objects
-const list = [
-    {name: 'Brian Vaughn', description: 'Software engineer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    {name: 'Yan Cei', description: 'Frontend Developer'},
-    // And so on...
 ];
 
-const Statistic: React.FC = () => {
-    const size = calcColumnSize(metersData[0]);
+const collumnsMap = [
+    'title', 'date',
+    'waterData', 'waterPrice', 'waterCost',
+    'electricityData', 'electricityPrice', 'electricityCost',
+    'gasPrice',
+    'rentPrice',
+    'serviceRentPrice',
+    'total'
+];
 
-    return <div>
-        {/*<Grid*/}
-        {/*    columnWidth={100}*/}
-        {/*    height={150}*/}
-        {/*    columnCount={size}*/}
-        {/*    rowCount={metersData.length}*/}
-        {/*    rowHeight={35}*/}
-        {/*    width={900}*/}
-        {/*    itemData={metersData}*/}
-        {/*>*/}
-        {/*    {Cell}*/}
-        {/*</Grid>*/}
-        <Table
-            width={300}
-            height={300}
-            headerHeight={20}
-            rowHeight={30}
-            rowCount={list.length}
-            rowGetter={({index}) => list[index]}>
-            <Column label="Name" dataKey="name" width={100} />
-            <Column width={200} label="Description" dataKey="description" />
-        </Table>
+interface IPreparedData extends IMetersData {
+    [index: string]: string | number | undefined,
+    waterCost?: number,
+    electricityCost?: number,
+    total?: number
+}
+
+const prepareRow = (index: number): any => {
+    const nonFirstMonthRent: boolean = index !== 0;
+    const row: any = metersData[index];
+
+    const newRow = collumnsMap.reduce((acc: IPreparedData, cellType: string): IPreparedData  => {
+        const cellData: number | string = row[cellType] || null;
+
+        switch (cellType) {
+            case 'waterCost':
+                let waterDiff: number =  0;
+
+                if (nonFirstMonthRent) {
+                    const lastMonthData: IMetersData = metersData[index - 1];
+                    waterDiff = row.waterData - lastMonthData.waterData!;
+                }
+
+                acc[cellType] = waterDiff * acc.waterPrice!;
+                break;
+            case 'electricityCost':
+                let electricityDiff: number = 0;
+
+                if (nonFirstMonthRent) {
+                    const lastMonthData: IMetersData = metersData[index - 1];
+                    electricityDiff = row!.electricityData - lastMonthData.electricityData
+                }
+                acc[cellType] = electricityDiff * acc.electricityPrice!;
+                break;
+            case 'total':
+                acc[cellType] = acc.waterCost! + acc.electricityCost! + acc.gasPrice! + acc.rentPrice!;
+                break;
+            default:
+                acc[cellType] = cellData;
+        }
+
+        // console.log(`i - ${index}`, {cellType, cellData, row, lastMonthData, acc});
+        return acc;
+    }, {} as IPreparedData);
+
+    console.log({newRow});
+
+    return newRow;
+}
+
+type rowGetterType = {
+    index: number
+}
+
+const Statistic: React.FC = () => {
+    const handleRowGetter = ({index}: rowGetterType) => {
+        return prepareRow(index);
+    };
+
+    return <div className='statistic-table'>
+        <div className='statistic-table__wrapper'>
+            <AutoSizer>
+                {({width, height}) => (
+                    <Table
+                        disableHeader={false}
+                        width={width}
+                        height={height}
+                        headerHeight={20}
+                        rowHeight={30}
+                        headerClassName='statistic-table__header'
+                        rowClassName='statistic-table__cell'
+                        rowCount={metersData.length}
+                        rowGetter={handleRowGetter}
+                    >
+                        <Column
+                            label="Описание"
+                            dataKey="title"
+                            width={100}
+                        />
+                        <Column
+                            width={100}
+                            label="Дата"
+                            dataKey="date"
+                        />
+                        <Column
+                            width={100}
+                            label="Показания воды"
+                            dataKey="waterData"
+                        />
+                        <Column
+                            width={100}
+                            label="Стоимость куба"
+                            dataKey="waterPrice"
+                        />
+                        <Column
+                            width={100}
+                            label="Итого за воду"
+                            dataKey="waterCost"
+                        />
+                        <Column
+                            width={100}
+                            label="Показания электричества"
+                            dataKey="electricityData"
+                        />
+                        <Column
+                            width={100}
+                            label="Стоимость 1квт"
+                            dataKey="electricityPrice"
+                        />
+                        <Column
+                            width={100}
+                            label="Итого за эл"
+                            dataKey="electricityCost"
+                        />
+                        <Column
+                            width={100}
+                            label="Стоимость газа"
+                            dataKey="gasPrice"
+                        />
+                        <Column
+                            width={100}
+                            label="Аренда"
+                            dataKey="rentPrice"
+                        />
+                        <Column
+                            width={100}
+                            label="Ком услуги"
+                            dataKey="serviceRentPrice"
+                        />
+                        <Column
+                            width={100}
+                            label="Всего"
+                            dataKey="total"
+                        />
+                    </Table>
+                )}
+            </AutoSizer>
+        </div>
     </div>
 }
 
