@@ -4,7 +4,10 @@ import {Column, Table, AutoSizer} from 'react-virtualized';
 import 'react-virtualized/styles.css'; // only needs to be imported once
 import './Statistic.scss'
 
+type dataType = string | number | undefined;
+
 interface IMetersData {
+    [index: string]: dataType,
     id?: number,
     title?: string,
     date?: number,
@@ -15,7 +18,7 @@ interface IMetersData {
     gasPrice?: number,
     rentPrice?: number,
     serviceRentPrice?: number,
-};
+}
 
 const metersData: Array<IMetersData> = [
     {
@@ -44,29 +47,37 @@ const metersData: Array<IMetersData> = [
     }
 ];
 
-const collumnsMap = [
-    'title', 'date',
-    'waterData', 'waterPrice', 'waterCost',
-    'electricityData', 'electricityPrice', 'electricityCost',
-    'gasPrice',
-    'rentPrice',
-    'serviceRentPrice',
-    'total'
-];
-
 interface IPreparedData extends IMetersData {
-    [index: string]: string | number | undefined,
     waterCost?: number,
     electricityCost?: number,
     total?: number
 }
 
-const prepareRow = (index: number): any => {
-    const nonFirstMonthRent: boolean = index !== 0;
-    const row: any = metersData[index];
+const collumnsMap = {
+    title: "Описание",
+    date: "Дата",
+    waterData: "Показания воды",
+    waterPrice: "Стоимость куба",
+    waterCost: "Итого за воду",
+    electricityData: "Показания электричества",
+    electricityPrice: "Стоимость 1квт",
+    electricityCost: "Итого за эл",
+    gasPrice: "Стоимость газа",
+    rentPrice: "Аренда",
+    serviceRentPrice: "Ком услуги",
+    total: "Всего"
+};
 
-    const newRow = collumnsMap.reduce((acc: IPreparedData, cellType: string): IPreparedData  => {
-        const cellData: number | string = row[cellType] || null;
+interface ICollumnsMap {
+    [index: string] : string
+}
+
+const prepareRow = (index: number): IPreparedData => {
+    const nonFirstMonthRent: boolean = index !== 0;
+    const currentMonthData: IMetersData = metersData[index];
+
+    const newRow = Object.keys(collumnsMap).reduce((acc: IPreparedData, cellType: string): IPreparedData  => {
+        const cellData: dataType = currentMonthData[cellType];
 
         switch (cellType) {
             case 'waterCost':
@@ -74,7 +85,7 @@ const prepareRow = (index: number): any => {
 
                 if (nonFirstMonthRent) {
                     const lastMonthData: IMetersData = metersData[index - 1];
-                    waterDiff = row.waterData - lastMonthData.waterData!;
+                    waterDiff = currentMonthData.waterData! - lastMonthData.waterData!;
                 }
 
                 acc[cellType] = waterDiff * acc.waterPrice!;
@@ -84,7 +95,7 @@ const prepareRow = (index: number): any => {
 
                 if (nonFirstMonthRent) {
                     const lastMonthData: IMetersData = metersData[index - 1];
-                    electricityDiff = row!.electricityData - lastMonthData.electricityData
+                    electricityDiff = currentMonthData!.electricityData - lastMonthData.electricityData
                 }
                 acc[cellType] = electricityDiff * acc.electricityPrice!;
                 break;
@@ -95,11 +106,8 @@ const prepareRow = (index: number): any => {
                 acc[cellType] = cellData;
         }
 
-        // console.log(`i - ${index}`, {cellType, cellData, row, lastMonthData, acc});
         return acc;
     }, {} as IPreparedData);
-
-    console.log({newRow});
 
     return newRow;
 }
@@ -112,6 +120,18 @@ const Statistic: React.FC = () => {
     const handleRowGetter = ({index}: rowGetterType) => {
         return prepareRow(index);
     };
+
+    const prepareColumns = (data: ICollumnsMap) => {
+        return Object.keys(data).map((key: string, i: number) => {
+            const title = data[key];
+            return (<Column
+                key={i}
+                label={title}
+                dataKey={key}
+                width={100}
+            />)
+        })
+    }
 
     return <div className='statistic-table'>
         <div className='statistic-table__wrapper'>
@@ -128,66 +148,7 @@ const Statistic: React.FC = () => {
                         rowCount={metersData.length}
                         rowGetter={handleRowGetter}
                     >
-                        <Column
-                            label="Описание"
-                            dataKey="title"
-                            width={100}
-                        />
-                        <Column
-                            width={100}
-                            label="Дата"
-                            dataKey="date"
-                        />
-                        <Column
-                            width={100}
-                            label="Показания воды"
-                            dataKey="waterData"
-                        />
-                        <Column
-                            width={100}
-                            label="Стоимость куба"
-                            dataKey="waterPrice"
-                        />
-                        <Column
-                            width={100}
-                            label="Итого за воду"
-                            dataKey="waterCost"
-                        />
-                        <Column
-                            width={100}
-                            label="Показания электричества"
-                            dataKey="electricityData"
-                        />
-                        <Column
-                            width={100}
-                            label="Стоимость 1квт"
-                            dataKey="electricityPrice"
-                        />
-                        <Column
-                            width={100}
-                            label="Итого за эл"
-                            dataKey="electricityCost"
-                        />
-                        <Column
-                            width={100}
-                            label="Стоимость газа"
-                            dataKey="gasPrice"
-                        />
-                        <Column
-                            width={100}
-                            label="Аренда"
-                            dataKey="rentPrice"
-                        />
-                        <Column
-                            width={100}
-                            label="Ком услуги"
-                            dataKey="serviceRentPrice"
-                        />
-                        <Column
-                            width={100}
-                            label="Всего"
-                            dataKey="total"
-                        />
+                        {prepareColumns(collumnsMap)}
                     </Table>
                 )}
             </AutoSizer>
