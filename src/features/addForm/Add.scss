@@ -1,0 +1,31 @@
+.add-form {
+  &__title {
+    margin-bottom: 20px;
+  }
+
+  &__from {
+    display: grid;
+    grid-template-columns: 700px;
+    grid-template-rows: repeat(8, 25px) 40px;
+    grid-row-gap: 2px;
+  }
+
+  &__input-wrapper {
+    display: grid;
+    grid-template-columns: 300px 300px 100px;
+  }
+
+  &__input_error {
+    border: 1px solid red;
+    border-radius: 2px;
+  }
+
+  &__input_error-text {
+    color: red;
+  }
+
+  &__submit {
+    width: 600px;
+    margin-top: 10px;
+  }
+}

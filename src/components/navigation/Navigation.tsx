@@ -6,7 +6,6 @@ import './Navigation.scss'
 const navigationList = [
     {title: 'Сводная таблица', url: '/'},
     {title: 'Добавить данные за месяц', url: '/add-page'},
-    {title: 'Изменить данные за месяц', url: '/edit-page'},
     {title: 'Counter', url: '/counter'},
     {title: 'Learn', url: '/learn'}
 ];

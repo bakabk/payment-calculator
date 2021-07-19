@@ -1,57 +1,21 @@
 import React from "react";
 import {Column, Table, AutoSizer} from 'react-virtualized';
 
-import 'react-virtualized/styles.css'; // only needs to be imported once
+import { useAppSelector } from '../../app/hooks';
+import {allRentData, IMetersData, dataType} from '../../features/rentData/rentDataReducerSlice'
+
+import 'react-virtualized/styles.css';
 import './Statistic.scss'
-
-type dataType = string | number | undefined;
-
-interface IMetersData {
-    [index: string]: dataType,
-    id?: number,
-    title?: string,
-    date?: number,
-    waterData?: number,
-    waterPrice?: number,
-    electricityData: number,
-    electricityPrice?: number,
-    gasPrice?: number,
-    rentPrice?: number,
-    serviceRentPrice?: number,
-}
-
-const metersData: Array<IMetersData> = [
-    {
-        id: 0,
-        title: 'за Май',
-        date: 1620301397791,
-        waterData: 10,
-        waterPrice: 70,
-        electricityData: 10,
-        electricityPrice: 40,
-        gasPrice: 150,
-        rentPrice: 20000,
-        serviceRentPrice: 1400
-    },
-    {
-        id: 1,
-        title: 'за Июль',
-        date: 1626361397791,
-        waterData: 15,
-        waterPrice: 70,
-        electricityData: 15,
-        electricityPrice: 40,
-        gasPrice: 150,
-        rentPrice: 20000,
-        serviceRentPrice: 1400
-    }
-];
 
 interface IPreparedData extends IMetersData {
     waterCost?: number,
     electricityCost?: number,
     total?: number
 }
+
+//добавить кнопки
+// изменения
+//копировать расчет
 
 const collumnsMap = {
     title: "Описание",
@@ -72,7 +36,7 @@ interface ICollumnsMap {
     [index: string] : string
 }
 
-const prepareRow = (index: number): IPreparedData => {
+const prepareRow = (index: number, metersData: Array<IMetersData>): IPreparedData => {
     const nonFirstMonthRent: boolean = index !== 0;
     const currentMonthData: IMetersData = metersData[index];
 
@@ -117,8 +81,10 @@ type rowGetterType = {
 }
 
 const Statistic: React.FC = () => {
+    const metersData = useAppSelector(allRentData);
+
     const handleRowGetter = ({index}: rowGetterType) => {
-        return prepareRow(index);
+        return prepareRow(index, metersData);
     };
 
     const prepareColumns = (data: ICollumnsMap) => {

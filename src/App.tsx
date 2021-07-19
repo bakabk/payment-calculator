@@ -3,8 +3,7 @@ import {Route, Switch, BrowserRouter as Router} from 'react-router-dom'
 import {Counter} from './features/counter/Counter';
 import Learn from './Learn';
 import Statistic from "./components/Statistic/Statistic";
-import Edit from './Edit';
-import Add from './Add';
+import Add from './features/addForm/Add';
 import Navigation from './components/navigation/Navigation';
 
 import './App.scss'
@@ -24,9 +23,6 @@ function App() {
                         <Switch>
                             <Route path="/add-page">
                                 <Add/>
-                            </Route>
-                            <Route path="/edit-page">
-                                <Edit/>
                             </Route>
                             <Route path="/counter">
                                 <Counter/>
