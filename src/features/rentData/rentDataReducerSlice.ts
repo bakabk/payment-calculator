@@ -20,7 +20,7 @@ export interface IMetersData {
 
 const initialState: Array<IMetersData> = [
     {
-        id: 0,
+        id: 1620361397791,
         title: 'за Май',
         date: new Date(1620361397791),
         waterData: 10,
@@ -32,7 +32,7 @@ const initialState: Array<IMetersData> = [
         serviceRentPrice: 1400
     },
     {
-        id: 1,
+        id: 1626361397791,
         title: 'за Июль',
         date: new Date(1626361397791),
         waterData: 15,
@@ -51,11 +51,21 @@ export const rentDataSlice = createSlice({
     reducers: {
         addData: (state, action: PayloadAction<IMetersData>) => {
             state.push(action.payload);
+        },
+        editData: (state, action: PayloadAction<IMetersData>) => {
+            const elementId = state.reduce((result: null | number, monthRent: IMetersData, i: number) => {
+                if (result !== null) return result;
+                    return action.payload.id === monthRent.id ? i : null;
+            }, null);
+
+            if (elementId !== null) {
+                state[elementId] = action.payload;
+            }
         }
     }
 })
 
-export const { addData } = rentDataSlice.actions;
+export const { addData, editData } = rentDataSlice.actions;
 
 export const allRentData = (state: RootState) => state.rentData;
 

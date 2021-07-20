@@ -5,7 +5,7 @@ import './Navigation.scss'
 
 const navigationList = [
     {title: 'Сводная таблица', url: '/'},
-    {title: 'Добавить данные за месяц', url: '/add-page'},
+    {title: 'Добавить/изменнить данные', url: '/edit-page/0'},
     {title: 'Counter', url: '/counter'},
     {title: 'Learn', url: '/learn'}
 ];

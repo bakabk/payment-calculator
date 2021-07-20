@@ -4,12 +4,13 @@ import {
     Form,
     useField
 } from 'formik';
+import {useParams} from 'react-router-dom';
 import * as Yup from 'yup';
 
-import { useAppDispatch } from '../../app/hooks';
-import {addData, IMetersData} from '../rentData/rentDataReducerSlice';
+import {useAppDispatch, useAppSelector} from '../../app/hooks';
+import {addData, editData, allRentData, IMetersData} from '../rentData/rentDataReducerSlice';
 
-import './Add.scss';
+import './EditForm.scss';
 
 const initialValues: IMetersData = {
     id: new Date().getTime(),
@@ -102,14 +103,27 @@ const prepareFormInputs = (data: Array<IInputProp>):Array<JSX.Element> => {
         </React.Fragment>
 ))}
 
-const Add: React.FC<{}> = () => {
+interface IRouterForm {
+    formId: string
+}
+
+const EditForm: React.FC<any> = (): JSX.Element => {
+    const {formId}: IRouterForm = useParams();
+
+    const metersData = useAppSelector(allRentData);
+    let formData: IMetersData = initialValues;
+
+    if (formId !== '0') {
+        formData = metersData.find((monthRent: IMetersData) => formId === monthRent.id!.toString()) || initialValues;
+    }
+
     const dispatch = useAppDispatch();
 
     return (
         <div className='add-form'>
             <h1 className='add-form__title'>Форма добавления данных</h1>
             <Formik
-                initialValues={initialValues}
+                initialValues={formData}
                 validationSchema={Yup.object({
                     id: Yup.number().required('Required'),
                     date: Yup.date().default(function () {
@@ -125,18 +139,22 @@ const Add: React.FC<{}> = () => {
                     waterPrice: Yup.number().required('Required')
                 })}
                 onSubmit={(values, actions) => {
-                    console.log('>>>onSubmit', { values, actions });
                     actions.setSubmitting(false);
-                    dispatch(addData(values));
+
+                    if (formId === '0') {
+                        dispatch(addData(values));
+                    } else {
+                        dispatch(editData(values));
+                    }
                 }}
             >
                 {formProps => {
-                    const isDiasabled = !formProps.isValid;
+                    const isDisabled = !formProps.isValid;
 
                     return <Form className="add-form__from">
                         {prepareFormInputs(formInputs)}
 
-                        <button disabled={isDiasabled} className='add-form__submit' type="submit">Submit</button>
+                        <button disabled={isDisabled} className='add-form__submit' type="submit">Submit</button>
                     </Form>
                 }}
             </Formik>
@@ -144,4 +162,5 @@ const Add: React.FC<{}> = () => {
     );
 };
 
-export default Add;
+// @ts-ignore
+export default EditForm;
