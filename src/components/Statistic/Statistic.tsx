@@ -1,5 +1,6 @@
-import React from "react";
+import React, {useRef} from "react";
 import {Column, Table, AutoSizer} from 'react-virtualized';
+import {useHistory} from "react-router-dom";
 
 import { useAppSelector } from '../../app/hooks';
 import {allRentData, IMetersData, dataType} from '../../features/rentData/rentDataReducerSlice'
@@ -29,7 +30,9 @@ const collumnsMap = {
     gasPrice: "Стоимость газа",
     rentPrice: "Аренда",
     serviceRentPrice: "Ком услуги",
-    total: "Всего"
+    total: "Всего",
+    edit: "Изменить",
+    copy: "Копировать"
 };
 
 interface ICollumnsMap {
@@ -40,7 +43,7 @@ const prepareRow = (index: number, metersData: Array<IMetersData>): IPreparedDat
     const nonFirstMonthRent: boolean = index !== 0;
     const currentMonthData: IMetersData = metersData[index];
 
-    const newRow = Object.keys(collumnsMap).reduce((acc: IPreparedData, cellType: string): IPreparedData  => {
+    const newRow = Object.keys(collumnsMap).reduce((acc: IPreparedData | any, cellType: string): IPreparedData  => {
         const cellData: dataType = currentMonthData[cellType];
 
         switch (cellType) {
@@ -66,6 +69,10 @@ const prepareRow = (index: number, metersData: Array<IMetersData>): IPreparedDat
             case 'total':
                 acc[cellType] = acc.waterCost! + acc.electricityCost! + acc.gasPrice! + acc.rentPrice!;
                 break;
+            case 'edit':
+            case 'copy':
+                acc[cellType] = '';
+                break;
             default:
                 acc[cellType] = cellData;
         }
@@ -80,12 +87,95 @@ type rowGetterType = {
     index: number
 }
 
+interface ItablePreparedData {
+    current: Array<IMetersData>
+}
+
+function copyToClipboard(text: string): void {
+    const el = document.createElement('textarea');
+    el.value = text;
+    el.setAttribute('id', 'copyText');
+    el.setAttribute('readonly', '');
+    el.style.position = 'absolute';
+    el.style.left = '-9999px';
+    document.body.appendChild(el);
+    const coptTextArea: null | HTMLElement = document.getElementById('copyText');
+
+    if (coptTextArea !== null) {
+        coptTextArea.focus();
+        document.execCommand('selectAll');
+        document.execCommand('copy');
+    }
+
+    document.body.removeChild(el);
+}
+
 const Statistic: React.FC = () => {
     const metersData = useAppSelector(allRentData);
+    const history = useHistory();
+    const tablePreparedData: ItablePreparedData  = useRef([]);
 
     const handleRowGetter = ({index}: rowGetterType) => {
-        return prepareRow(index, metersData);
+        tablePreparedData.current[index] = prepareRow(index, metersData);
+        return tablePreparedData.current[index];
     };
+
+    const handleCopyData = (event: React.MouseEvent<HTMLElement, MouseEvent>): void => {
+        if (event?.target instanceof HTMLElement) {
+            const index: string = event.target.dataset.index!;
+            const rowData: IMetersData = tablePreparedData.current[+index];
+            console.log({rowData, index, ref: tablePreparedData.current});
+
+
+            const {electricityCost, //200
+                    electricityData, //15
+                    electricityPrice, //40
+                    gasPrice, //150
+                    rentPrice, //20000
+                    serviceRentPrice, //1400
+                    total, //20700
+                    waterCost, //350
+                    waterData, //15
+                    waterPrice //70
+                } = rowData;
+
+            //тут надо преобразовать данные для копирования
+
+            copyToClipboard('111');
+        }
+    }
+
+    const handleEditRow = (event: React.MouseEvent<HTMLElement, MouseEvent>): void => {
+        if (event?.target instanceof HTMLElement) {
+            const id: string = event.target.dataset.id!;
+            history.push(`/edit-page/${id}`);
+        }
+    }
+
+    const handleCellRenderer = (cellRenderProps: any): any => {
+        switch (cellRenderProps.dataKey) {
+            case 'edit':
+                return <button
+                    className=''
+                    data-id={cellRenderProps.rowData.date}
+                    onClick={handleEditRow}
+                >
+                    edit
+                </button>
+            case 'copy':
+                const data = cellRenderProps.rowData;
+                console.log({data, cellRenderProps});
+                return <button
+                    className='.statistic-table__cell_button'
+                    data-index={cellRenderProps.rowIndex}
+                    onClick={handleCopyData}
+                >
+                    copy
+                </button>;
+            default:
+                return cellRenderProps.cellData;
+        }
+    }
 
     const prepareColumns = (data: ICollumnsMap) => {
         return Object.keys(data).map((key: string, i: number) => {
@@ -95,6 +185,7 @@ const Statistic: React.FC = () => {
                 label={title}
                 dataKey={key}
                 width={100}
+                cellRenderer={handleCellRenderer}
             />)
         })
     }
@@ -110,7 +201,7 @@ const Statistic: React.FC = () => {
                         headerHeight={20}
                         rowHeight={30}
                         headerClassName='statistic-table__header'
-                        rowClassName='statistic-table__cell'
+                        rowClassName='statistic-table__row'
                         rowCount={metersData.length}
                         rowGetter={handleRowGetter}
                     >
