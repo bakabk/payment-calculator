@@ -8,7 +8,7 @@ export interface IMetersData {
     [index: string]: dataType,
     id?: number,
     title?: string,
-    date?: Date,
+    date?: number,
     waterData?: number,
     waterPrice?: number,
     electricityData: number,
@@ -22,7 +22,7 @@ const initialState: Array<IMetersData> = [
     {
         id: 1620361397791,
         title: 'за Май',
-        date: new Date(1620361397791),
+        date: 1620361397791,
         waterData: 10,
         waterPrice: 70,
         electricityData: 10,
@@ -34,7 +34,7 @@ const initialState: Array<IMetersData> = [
     {
         id: 1626361397791,
         title: 'за Июль',
-        date: new Date(1626361397791),
+        date: 1626361397791,
         waterData: 15,
         waterPrice: 70,
         electricityData: 15,

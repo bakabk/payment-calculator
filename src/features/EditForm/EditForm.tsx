@@ -14,7 +14,7 @@ import './EditForm.scss';
 
 const initialValues: IMetersData = {
     id: new Date().getTime(),
-    date: new Date(),
+    date: new Date().getTime(),
     electricityData: 0,
     electricityPrice: 0,
     gasPrice: 150,
@@ -32,6 +32,16 @@ interface IInputProp {
 }
 
 const formInputs: Array<IInputProp> = [
+    {
+        title: 'Идентификатор',
+        name: 'id',
+        placeholder: 'id'
+    },
+    {
+        title: 'Дата добавления',
+        name: 'date',
+        placeholder: 'date'
+    },
     {
         title: 'Описание',
         name: 'title',
@@ -119,16 +129,16 @@ const EditForm: React.FC<any> = (): JSX.Element => {
 
     const dispatch = useAppDispatch();
 
+    const formType = formId === '0' ? 'добавления' : 'изменения';
+
     return (
         <div className='add-form'>
-            <h1 className='add-form__title'>Форма добавления данных</h1>
+            <h1 className='add-form__title'>Форма {formType} данных</h1>
             <Formik
                 initialValues={formData}
                 validationSchema={Yup.object({
                     id: Yup.number().required('Required'),
-                    date: Yup.date().default(function () {
-                        return new Date();
-                    }),
+                    date: Yup.number().required('Required'),
                     electricityData: Yup.number().required('Required'),
                     electricityPrice: Yup.number().required('Required'),
                     gasPrice: Yup.number().required('Required'),
