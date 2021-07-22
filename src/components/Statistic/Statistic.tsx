@@ -17,13 +17,13 @@ interface IPreparedData extends IMetersData {
 const collumnsMap = {
     title: "Описание",
     date: "Дата",
-    waterData: "Показания воды",
-    waterPrice: "Стоимость куба",
-    waterCost: "Итого за воду",
-    electricityData: "Показания электричества",
-    electricityPrice: "Стоимость 1квт",
-    electricityCost: "Итого за эл",
-    gasPrice: "Стоимость газа",
+    waterData: "Вода",
+    waterPrice: "За куб",
+    waterCost: "За воду",
+    electricityData: "Электричество",
+    electricityPrice: "За 1квт",
+    electricityCost: "За эл",
+    gasPrice: "За газа",
     rentPrice: "Аренда",
     serviceRentPrice: "Ком услуги",
     total: "Всего",
@@ -93,6 +93,20 @@ function copyToClipboard(text: string): void {
         });
 }
 
+function prepareDate(timeStamp: number):string {
+    const dateObject = new Date(timeStamp);
+
+    let month: string = `${dateObject.getMonth() + 1}`;
+    if (+month < 10) {month = `0${month}`}
+
+    let date: string = `${dateObject.getDate()}`;
+    if (+date < 10) {date = `0${date}`}
+
+    const year: string = `${dateObject.getFullYear()}`;
+
+    return `${date}/${month}/${year}`;
+}
+
 const Statistic: React.FC = () => {
     const metersData = useAppSelector(allRentData);
     const history = useHistory();
@@ -150,9 +164,11 @@ const Statistic: React.FC = () => {
 
     const handleCellRenderer = (cellRenderProps: any): any => {
         switch (cellRenderProps.dataKey) {
+            case 'date':
+                return prepareDate(+cellRenderProps.rowData.date);
             case 'edit':
                 return <button
-                    className=''
+                    className='statistic-table__cell_button'
                     data-id={cellRenderProps.rowData.date}
                     onClick={handleEditRow}
                 >
@@ -160,7 +176,7 @@ const Statistic: React.FC = () => {
                 </button>
             case 'copy':
                 return cellRenderProps.rowIndex ? <button
-                    className='.statistic-table__cell_button'
+                    className='statistic-table__cell_button'
                     data-index={cellRenderProps.rowIndex}
                     onClick={handleCopyData}
                 >
