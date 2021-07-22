@@ -14,10 +14,6 @@ interface IPreparedData extends IMetersData {
     total?: number
 }
 
-//добавить кнопки
-// изменения
-//копировать расчет
-
 const collumnsMap = {
     title: "Описание",
     date: "Дата",
@@ -43,7 +39,7 @@ const prepareRow = (index: number, metersData: Array<IMetersData>): IPreparedDat
     const nonFirstMonthRent: boolean = index !== 0;
     const currentMonthData: IMetersData = metersData[index];
 
-    const newRow = Object.keys(collumnsMap).reduce((acc: IPreparedData | any, cellType: string): IPreparedData  => {
+    return Object.keys(collumnsMap).reduce((acc: IPreparedData | any, cellType: string): IPreparedData  => {
         const cellData: dataType = currentMonthData[cellType];
 
         switch (cellType) {
@@ -79,8 +75,6 @@ const prepareRow = (index: number, metersData: Array<IMetersData>): IPreparedDat
 
         return acc;
     }, {} as IPreparedData);
-
-    return newRow;
 }
 
 type rowGetterType = {
@@ -92,22 +86,11 @@ interface ItablePreparedData {
 }
 
 function copyToClipboard(text: string): void {
-    const el = document.createElement('textarea');
-    el.value = text;
-    el.setAttribute('id', 'copyText');
-    el.setAttribute('readonly', '');
-    el.style.position = 'absolute';
-    el.style.left = '-9999px';
-    document.body.appendChild(el);
-    const coptTextArea: null | HTMLElement = document.getElementById('copyText');
-
-    if (coptTextArea !== null) {
-        coptTextArea.focus();
-        document.execCommand('selectAll');
-        document.execCommand('copy');
-    }
-
-    document.body.removeChild(el);
+    navigator.clipboard
+        .writeText(text)
+        .catch(() => {
+            alert('Не удалось скопировать данные(')
+        });
 }
 
 const Statistic: React.FC = () => {
@@ -123,11 +106,13 @@ const Statistic: React.FC = () => {
     const handleCopyData = (event: React.MouseEvent<HTMLElement, MouseEvent>): void => {
         if (event?.target instanceof HTMLElement) {
             const index: string = event.target.dataset.index!;
-            const rowData: IMetersData = tablePreparedData.current[+index];
-            console.log({rowData, index, ref: tablePreparedData.current});
+            const currentMonthData: IMetersData = tablePreparedData.current[+index];
+            if (+index > 0) {
+                const lastMonthData: IMetersData = tablePreparedData.current[+index - 1];
 
-
-            const {electricityCost, //200
+                const {
+                    title,
+                    electricityCost, //200
                     electricityData, //15
                     electricityPrice, //40
                     gasPrice, //150
@@ -137,11 +122,22 @@ const Statistic: React.FC = () => {
                     waterCost, //350
                     waterData, //15
                     waterPrice //70
-                } = rowData;
+                } = currentMonthData;
 
-            //тут надо преобразовать данные для копирования
+                const waterDiff = waterData! - lastMonthData.waterData!;
+                const electricityDiff = electricityData! - lastMonthData.electricityData!;
 
-            copyToClipboard('111');
+                const massage = `
+                    ${title} 
+                    вода ${waterData} - ${lastMonthData.waterData} = ${waterDiff} * ${waterPrice} = ${waterCost}
+                    газ ${gasPrice}
+                    свет ${electricityData} - ${lastMonthData.electricityData} = ${electricityDiff} * ${electricityPrice} = ${electricityCost}
+                    квертплата ${serviceRentPrice}
+                    + ${rentPrice} = ${total}
+                    `;
+
+                copyToClipboard(massage);
+            }
         }
     }
 
@@ -163,15 +159,13 @@ const Statistic: React.FC = () => {
                     edit
                 </button>
             case 'copy':
-                const data = cellRenderProps.rowData;
-                console.log({data, cellRenderProps});
-                return <button
+                return cellRenderProps.rowIndex ? <button
                     className='.statistic-table__cell_button'
                     data-index={cellRenderProps.rowIndex}
                     onClick={handleCopyData}
                 >
                     copy
-                </button>;
+                </button> : null; //подумать о правильном отображении за 1 месяц
             default:
                 return cellRenderProps.cellData;
         }
