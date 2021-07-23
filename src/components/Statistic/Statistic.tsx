@@ -3,7 +3,7 @@ import {Column, Table, AutoSizer} from 'react-virtualized';
 import {useHistory} from "react-router-dom";
 
 import { useAppSelector } from '../../app/hooks';
-import {allRentData, IMetersData, dataType} from '../../features/rentData/rentDataReducerSlice'
+import {saveData, allRentData, IMetersData, dataType} from '../../features/rentData/rentDataReducerSlice'
 
 import 'react-virtualized/styles.css';
 import './Statistic.scss'
@@ -35,9 +35,9 @@ interface ICollumnsMap {
     [index: string] : string
 }
 
-const prepareRow = (index: number, metersData: Array<IMetersData>): IPreparedData => {
+const prepareRow = (index: number, data: Array<IMetersData>): IPreparedData => {
     const nonFirstMonthRent: boolean = index !== 0;
-    const currentMonthData: IMetersData = metersData[index];
+    const currentMonthData: IMetersData = data[index];
 
     return Object.keys(collumnsMap).reduce((acc: IPreparedData | any, cellType: string): IPreparedData  => {
         const cellData: dataType = currentMonthData[cellType];
@@ -47,7 +47,7 @@ const prepareRow = (index: number, metersData: Array<IMetersData>): IPreparedDat
                 let waterDiff: number =  0;
 
                 if (nonFirstMonthRent) {
-                    const lastMonthData: IMetersData = metersData[index - 1];
+                    const lastMonthData: IMetersData = data[index - 1];
                     waterDiff = currentMonthData.waterData! - lastMonthData.waterData!;
                 }
 
@@ -57,7 +57,7 @@ const prepareRow = (index: number, metersData: Array<IMetersData>): IPreparedDat
                 let electricityDiff: number = 0;
 
                 if (nonFirstMonthRent) {
-                    const lastMonthData: IMetersData = metersData[index - 1];
+                    const lastMonthData: IMetersData = data[index - 1];
                     electricityDiff = currentMonthData!.electricityData - lastMonthData.electricityData
                 }
                 acc[cellType] = electricityDiff * acc.electricityPrice!;
@@ -107,13 +107,38 @@ function prepareDate(timeStamp: number):string {
     return `${date}/${month}/${year}`;
 }
 
+const getData = async (isLoaded: boolean): Promise<any> => {
+    if (!isLoaded) {
+        try {
+            const result = await fetch('http://localhost:3001/api/data/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            let json;
+
+            if (result.ok) {
+                json = await result.json();
+                console.log({json});
+                return json;
+            } else {
+                throw new Error('Что-то пошло не так...');
+            }
+        } catch (err) {
+            console.warn(err);
+        }
+    }
+}
+
 const Statistic: React.FC = () => {
     const metersData = useAppSelector(allRentData);
     const history = useHistory();
     const tablePreparedData: ItablePreparedData  = useRef([]);
 
     const handleRowGetter = ({index}: rowGetterType) => {
-        tablePreparedData.current[index] = prepareRow(index, metersData);
+        tablePreparedData.current[index] = prepareRow(index, metersData.data);
         return tablePreparedData.current[index];
     };
 
@@ -200,21 +225,9 @@ const Statistic: React.FC = () => {
         })
     }
 
-    useEffect( () => {
-        fetch('http://localhost:3001/api/data/', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        }).then(res => {
-            if (res.ok) {
-                return res.json();
-            }
-        }).then(result => {
-            console.log(result);
-        }).catch((err) => {
-            console.warn(err);
-        })
+    useEffect(  () => {
+        const data = getData(metersData.isLoaded);
+        saveData(data);
     });
 
     return <div className='statistic-table'>
@@ -229,7 +242,7 @@ const Statistic: React.FC = () => {
                         rowHeight={30}
                         headerClassName='statistic-table__header'
                         rowClassName='statistic-table__row'
-                        rowCount={metersData.length}
+                        rowCount={metersData.data.length}
                         rowGetter={handleRowGetter}
                     >
                         {prepareColumns(collumnsMap)}

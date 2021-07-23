@@ -124,7 +124,7 @@ const EditForm: React.FC<any> = (): JSX.Element => {
     let formData: IMetersData = initialValues;
 
     if (formId !== '0') {
-        formData = metersData.find((monthRent: IMetersData) => formId === monthRent.id!.toString()) || initialValues;
+        formData = metersData.data.find((monthRent: IMetersData) => formId === monthRent.id!.toString()) || initialValues;
     }
 
     const dispatch = useAppDispatch();
