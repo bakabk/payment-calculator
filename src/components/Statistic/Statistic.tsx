@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import {Column, Table, AutoSizer} from 'react-virtualized';
 import {useHistory} from "react-router-dom";
 
@@ -199,6 +199,23 @@ const Statistic: React.FC = () => {
             />)
         })
     }
+
+    useEffect( () => {
+        fetch('http://localhost:3001/api/data/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+        }).then(result => {
+            console.log(result);
+        }).catch((err) => {
+            console.warn(err);
+        })
+    });
 
     return <div className='statistic-table'>
         <div className='statistic-table__wrapper'>
