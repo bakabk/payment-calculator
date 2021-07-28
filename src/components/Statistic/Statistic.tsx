@@ -3,7 +3,14 @@ import {Column, Table, AutoSizer} from 'react-virtualized';
 import {useHistory} from "react-router-dom";
 
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
-import {loadingData, errorWithData, saveData, allRentData, IMetersData, dataType} from '../../features/rentData/rentDataReducerSlice'
+import {
+    loadingData,
+    errorWithData,
+    saveData,
+    allRentData,
+    IMetersData,
+    dataType
+} from '../../features/rentData/rentDataReducerSlice'
 
 import 'react-virtualized/styles.css';
 import './Statistic.scss'
@@ -32,19 +39,19 @@ const collumnsMap = {
 };
 
 interface ICollumnsMap {
-    [index: string] : string
+    [index: string]: string
 }
 
 const prepareRow = (index: number, data: Array<IMetersData>): IPreparedData => {
     const nonFirstMonthRent: boolean = index !== 0;
     const currentMonthData: IMetersData = data[index];
 
-    return Object.keys(collumnsMap).reduce((acc: IPreparedData | any, cellType: string): IPreparedData  => {
+    return Object.keys(collumnsMap).reduce((acc: IPreparedData | any, cellType: string): IPreparedData => {
         const cellData: dataType = currentMonthData[cellType];
 
         switch (cellType) {
             case 'waterCost':
-                let waterDiff: number =  0;
+                let waterDiff: number = 0;
 
                 if (nonFirstMonthRent) {
                     const lastMonthData: IMetersData = data[index - 1];
@@ -93,14 +100,18 @@ function copyToClipboard(text: string): void {
         });
 }
 
-function prepareDate(timeStamp: number):string {
+function prepareDate(timeStamp: number): string {
     const dateObject = new Date(timeStamp);
 
     let month: string = `${dateObject.getMonth() + 1}`;
-    if (+month < 10) {month = `0${month}`}
+    if (+month < 10) {
+        month = `0${month}`
+    }
 
     let date: string = `${dateObject.getDate()}`;
-    if (+date < 10) {date = `0${date}`}
+    if (+date < 10) {
+        date = `0${date}`
+    }
 
     const year: string = `${dateObject.getFullYear()}`;
 
@@ -137,7 +148,7 @@ const Statistic: React.FC = () => {
     const {isLoading, data, isError} = metersData;
     const history = useHistory();
     const dispatch = useAppDispatch();
-    const tablePreparedData: ItablePreparedData  = useRef([]);
+    const tablePreparedData: ItablePreparedData = useRef([]);
 
     const handleRowGetter = ({index}: rowGetterType) => {
         tablePreparedData.current[index] = prepareRow(index, metersData.data);
@@ -227,7 +238,7 @@ const Statistic: React.FC = () => {
         })
     }
 
-    useEffect(  () => {
+    useEffect(() => {
         if (!data.length && !isLoading && !isError) {
             dispatch(loadingData());
             getData(dispatch);
@@ -235,26 +246,26 @@ const Statistic: React.FC = () => {
     }, [data, isLoading, isError]);
 
     return <div className='statistic-table'>
-        {isLoading ? <div>Loading data...</div> :
-        <div className='statistic-table__wrapper'>
-            <AutoSizer>
-                {({width, height}) => (
-                    <Table
-                        disableHeader={false}
-                        width={width}
-                        height={height}
-                        headerHeight={20}
-                        rowHeight={30}
-                        headerClassName='statistic-table__header'
-                        rowClassName='statistic-table__row'
-                        rowCount={metersData.data.length}
-                        rowGetter={handleRowGetter}
-                    >
-                        {prepareColumns(collumnsMap)}
-                    </Table>
-                )}
-            </AutoSizer>
-        </div>}
+        {isLoading ? <div>Загрузка данных...</div> :
+            <div className='statistic-table__wrapper'>
+                <AutoSizer>
+                    {({width, height}) => (
+                        <Table
+                            disableHeader={false}
+                            width={width}
+                            height={height}
+                            headerHeight={20}
+                            rowHeight={30}
+                            headerClassName='statistic-table__header'
+                            rowClassName='statistic-table__row'
+                            rowCount={metersData.data.length}
+                            rowGetter={handleRowGetter}
+                        >
+                            {prepareColumns(collumnsMap)}
+                        </Table>
+                    )}
+                </AutoSizer>
+            </div>}
     </div>
 }
 
