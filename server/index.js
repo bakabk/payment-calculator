@@ -40,6 +40,8 @@ mongoose.connect('mongodb://localhost:27017/payment',{
 app.get('/api/data/', (req, res) => {
     payment.find({}, (err, data) => {
         if (err) return console.warn(err);
-        res.send(data);
+        setTimeout(() => {
+            res.send(data);
+        }, 2000);
     })
 });

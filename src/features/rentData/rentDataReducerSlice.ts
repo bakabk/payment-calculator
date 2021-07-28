@@ -20,7 +20,8 @@ export interface IMetersData {
 
 interface IRentData {
     data: Array<IMetersData>,
-    isLoaded: boolean
+    isLoading: boolean,
+    isError: boolean
 }
 
 const initialState: IRentData = {
@@ -50,14 +51,23 @@ const initialState: IRentData = {
         //     serviceRentPrice: 1400
         // }
     ],
-    isLoaded: false
+    isLoading: false,
+    isError: false
 };
 
 export const rentDataSlice = createSlice({
     name: 'rentData',
     initialState,
     reducers: {
+        loadingData: (state) => {
+            state.isLoading = true;
+        },
+        errorWithData: (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
+        },
         saveData: (state: IRentData, action: PayloadAction<any>) => {
+            state.isLoading = false;
             state.data = [...action.payload];
         },
         addData: (state: IRentData, action: PayloadAction<IMetersData>) => {
@@ -76,7 +86,7 @@ export const rentDataSlice = createSlice({
     }
 })
 
-export const {saveData, addData, editData} = rentDataSlice.actions;
+export const {loadingData, errorWithData, saveData, addData, editData} = rentDataSlice.actions;
 
 export const allRentData = (state: RootState) => state.rentData;
 

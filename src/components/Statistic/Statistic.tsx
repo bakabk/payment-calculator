@@ -2,8 +2,8 @@ import React, {useEffect, useRef} from "react";
 import {Column, Table, AutoSizer} from 'react-virtualized';
 import {useHistory} from "react-router-dom";
 
-import { useAppSelector } from '../../app/hooks';
-import {saveData, allRentData, IMetersData, dataType} from '../../features/rentData/rentDataReducerSlice'
+import {useAppDispatch, useAppSelector} from '../../app/hooks';
+import {loadingData, errorWithData, saveData, allRentData, IMetersData, dataType} from '../../features/rentData/rentDataReducerSlice'
 
 import 'react-virtualized/styles.css';
 import './Statistic.scss'
@@ -107,34 +107,36 @@ function prepareDate(timeStamp: number):string {
     return `${date}/${month}/${year}`;
 }
 
-const getData = async (isLoaded: boolean): Promise<any> => {
-    if (!isLoaded) {
-        try {
-            const result = await fetch('http://localhost:3001/api/data/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+const getData = async (dispatch: any): Promise<any> => {
+    try {
+        const url: string = 'http://localhost:3001/api/data/';
+        const result = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-            let json;
+        let json;
 
-            if (result.ok) {
-                json = await result.json();
-                console.log({json});
-                return json;
-            } else {
-                throw new Error('Что-то пошло не так...');
-            }
-        } catch (err) {
-            console.warn(err);
+        if (result.ok) {
+            json = await result.json();
+            console.log({json});
+            dispatch(saveData(json));
+        } else {
+            new Error('Что-то пошло не так...');
         }
+    } catch (err) {
+        dispatch(errorWithData(err));
+        console.warn(err);
     }
 }
 
 const Statistic: React.FC = () => {
     const metersData = useAppSelector(allRentData);
+    const {isLoading, data, isError} = metersData;
     const history = useHistory();
+    const dispatch = useAppDispatch();
     const tablePreparedData: ItablePreparedData  = useRef([]);
 
     const handleRowGetter = ({index}: rowGetterType) => {
@@ -226,11 +228,14 @@ const Statistic: React.FC = () => {
     }
 
     useEffect(  () => {
-        const data = getData(metersData.isLoaded);
-        saveData(data);
-    });
+        if (!data.length && !isLoading && !isError) {
+            dispatch(loadingData());
+            getData(dispatch);
+        }
+    }, [data, isLoading, isError]);
 
     return <div className='statistic-table'>
+        {isLoading ? <div>Loading data...</div> :
         <div className='statistic-table__wrapper'>
             <AutoSizer>
                 {({width, height}) => (
@@ -249,7 +254,7 @@ const Statistic: React.FC = () => {
                     </Table>
                 )}
             </AutoSizer>
-        </div>
+        </div>}
     </div>
 }
 
