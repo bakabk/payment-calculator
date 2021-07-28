@@ -2,6 +2,7 @@ import React, {useEffect, useRef} from "react";
 import {Column, Table, AutoSizer} from 'react-virtualized';
 import {useHistory} from "react-router-dom";
 
+import ErrorBoundary from "../ErrorBoundary";
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {
     loadingData,
@@ -239,10 +240,11 @@ const Statistic: React.FC = () => {
     }
 
     useEffect(() => {
-        if (!data.length && !isLoading && !isError) {
-            dispatch(loadingData());
-            getData(dispatch);
-        }
+        throw new Error('что-то пошло не так');
+        // if (!data.length && !isLoading && !isError) {
+        //     dispatch(loadingData());
+        //     getData(dispatch);
+        // }
     }, [data, isLoading, isError]);
 
     return <div className='statistic-table'>
