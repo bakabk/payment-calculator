@@ -2,6 +2,8 @@ import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 import {RootState} from "../../app/store";
 
+const API_URL = 'http://localhost:3001/api/';
+
 export type dataType = string | number | undefined | Date;
 
 export interface IMetersData {
@@ -20,37 +22,14 @@ export interface IMetersData {
 
 interface IRentData {
     data: Array<IMetersData>,
+    isPending: boolean,
     isLoading: boolean,
     isError: boolean
 }
 
 const initialState: IRentData = {
-    data: [
-        // {
-        //     id: 1620361397791,
-        //     title: 'за Май',
-        //     date: 1620361397791,
-        //     waterData: 10,
-        //     waterPrice: 70,
-        //     electricityData: 10,
-        //     electricityPrice: 40,
-        //     gasPrice: 150,
-        //     rentPrice: 20000,
-        //     serviceRentPrice: 1400
-        // },
-        // {
-        //     id: 1626361397791,
-        //     title: 'за Июль',
-        //     date: 1626361397791,
-        //     waterData: 15,
-        //     waterPrice: 70,
-        //     electricityData: 15,
-        //     electricityPrice: 40,
-        //     gasPrice: 150,
-        //     rentPrice: 20000,
-        //     serviceRentPrice: 1400
-        // }
-    ],
+    data: [],
+    isPending: false,
     isLoading: false,
     isError: false
 };
@@ -61,9 +40,8 @@ export const fetchDataAsync = createAsyncThunk(
         let error = 'что-то пошло не так';
 
         try {
-            const url: string = 'http://localhost:3001/api/data/';
+            const url: string = `${API_URL}data/`;
             const result = await fetch(url, {
-                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -81,6 +59,33 @@ export const fetchDataAsync = createAsyncThunk(
     }
 );
 
+export const addDataAsync = createAsyncThunk(
+    'addData',
+    async (data: any) => {
+        let error = 'что-то пошло не так';
+
+        try {
+            const url: string = `${API_URL}add/`;
+            const result = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (result.ok) {
+                const json = await result.json();
+                return json;
+            } else {
+                return {error};
+            }
+        } catch (err) {
+            return {error};
+        }
+    }
+)
+
 export const rentDataSlice = createSlice({
     name: 'rentData',
     initialState,
@@ -92,9 +97,6 @@ export const rentDataSlice = createSlice({
         saveData: (state: IRentData, action: PayloadAction<any>) => {
             state.isLoading = false;
             state.data = [...action.payload];
-        },
-        addData: (state: IRentData, action: PayloadAction<IMetersData>) => {
-            state.data.push(action.payload);
         },
         editData: (state: IRentData, action: PayloadAction<IMetersData>) => {
             const elementId = state.data.reduce((result: null | number, monthRent: IMetersData, i: number) => {
@@ -121,10 +123,17 @@ export const rentDataSlice = createSlice({
                     state.data = action.payload;
                 }
             })
+            .addCase(addDataAsync.pending, (state) => {
+                state.isPending = true;
+            })
+            .addCase(addDataAsync.fulfilled, (state, action) => {
+                state.isPending = false;
+                state.data = [];
+            })
     }
 })
 
-export const {errorWithData, saveData, addData, editData} = rentDataSlice.actions;
+export const {errorWithData, saveData, editData} = rentDataSlice.actions;
 
 export const allRentData = (state: RootState) => state.rentData;
 

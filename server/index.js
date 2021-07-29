@@ -19,7 +19,7 @@ const monthSlicesSchema = new Schema({
     serviceRentPrice: Number
 }, {versionKey: false});
 
-const payment = mongoose.model('Monthslice', monthSlicesSchema);
+const monthPayment = mongoose.model('Monthslice', monthSlicesSchema);
 
 app.use(express.static('/'));
 app.use(cors({
@@ -38,11 +38,22 @@ mongoose.connect('mongodb://localhost:27017/payment',{
 });
 
 app.get('/api/data/', (req, res) => {
-    payment.find({}, (err, data) => {
+    monthPayment.find({}, (err, data) => {
         if (err) return console.warn(err);
         setTimeout(() => {
             res.send(data);
             // res.status(500).send('Something broke!');
         }, 2000);
+    })
+});
+
+app.post('/api/add/', jsonParser, (req, res) => {
+    if (!req.body) return res.sendStatus(400);
+
+    const data = new monthPayment({...req.body});
+
+    data.save((err) => {
+        if (err) return console.log(err);
+        res.send(data);
     })
 });

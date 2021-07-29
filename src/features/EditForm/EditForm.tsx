@@ -8,7 +8,7 @@ import {useParams} from 'react-router-dom';
 import * as Yup from 'yup';
 
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
-import {addData, editData, allRentData, IMetersData} from '../rentData/rentDataReducerSlice';
+import {addDataAsync, editData, allRentData, IMetersData} from '../rentData/rentDataReducerSlice';
 
 import './EditForm.scss';
 
@@ -152,7 +152,7 @@ const EditForm: React.FC<any> = (): JSX.Element => {
                     actions.setSubmitting(false);
 
                     if (formId === '0') {
-                        dispatch(addData(values));
+                        dispatch(addDataAsync(values));
                     } else {
                         dispatch(editData(values));
                     }
