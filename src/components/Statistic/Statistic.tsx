@@ -4,12 +4,10 @@ import {useHistory} from "react-router-dom";
 
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {
-    loadingData,
-    errorWithData,
-    saveData,
+    fetchDataAsync,
     allRentData,
     IMetersData,
-    dataType
+    dataType,
 } from '../../features/rentData/rentDataReducerSlice'
 
 import 'react-virtualized/styles.css';
@@ -118,31 +116,6 @@ function prepareDate(timeStamp: number): string {
     return `${date}/${month}/${year}`;
 }
 
-const getData = async (dispatch: any): Promise<any> => {
-    try {
-        const url: string = 'http://localhost:3001/api/data/';
-        const result = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        let json;
-
-        if (result.ok) {
-            json = await result.json();
-            console.log({json});
-            dispatch(saveData(json));
-        } else {
-            new Error('Что-то пошло не так...');
-        }
-    } catch (err) {
-        dispatch(errorWithData(err));
-        console.warn(err);
-    }
-}
-
 const Statistic: React.FC = () => {
     const metersData = useAppSelector(allRentData);
     const {isLoading, data, isError} = metersData;
@@ -240,10 +213,9 @@ const Statistic: React.FC = () => {
 
     useEffect(() => {
         if (!data.length && !isLoading && !isError) {
-            dispatch(loadingData());
-            getData(dispatch);
+            dispatch(fetchDataAsync());
         }
-    }, [data, isLoading, isError]);
+    }, [data, isLoading, isError, dispatch]);
 
     return <div className='statistic-table'>
         {isLoading ? <div>Загрузка данных...</div> :

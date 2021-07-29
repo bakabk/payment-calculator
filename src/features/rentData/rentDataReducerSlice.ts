@@ -1,4 +1,4 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 import {RootState} from "../../app/store";
 
@@ -55,13 +55,36 @@ const initialState: IRentData = {
     isError: false
 };
 
+export const fetchDataAsync = createAsyncThunk(
+    'fetchData',
+    async () => {
+        let error = 'что-то пошло не так';
+
+        try {
+            const url: string = 'http://localhost:3001/api/data/';
+            const result = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (result.ok) {
+                const json = await result.json();
+                return json;
+            } else {
+                return {error};
+            }
+        } catch (err) {
+            return {error};
+        }
+    }
+);
+
 export const rentDataSlice = createSlice({
     name: 'rentData',
     initialState,
     reducers: {
-        loadingData: (state) => {
-            state.isLoading = true;
-        },
         errorWithData: (state, action) => {
             state.isLoading = false;
             state.isError = true;
@@ -83,10 +106,25 @@ export const rentDataSlice = createSlice({
                 state.data[elementId] = action.payload;
             }
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchDataAsync.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchDataAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+
+                if (action.payload.error) {
+                    state.isError = true;
+                } else {
+                    state.data = action.payload;
+                }
+            })
     }
 })
 
-export const {loadingData, errorWithData, saveData, addData, editData} = rentDataSlice.actions;
+export const {errorWithData, saveData, addData, editData} = rentDataSlice.actions;
 
 export const allRentData = (state: RootState) => state.rentData;
 

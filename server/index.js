@@ -42,6 +42,7 @@ app.get('/api/data/', (req, res) => {
         if (err) return console.warn(err);
         setTimeout(() => {
             res.send(data);
+            // res.status(500).send('Something broke!');
         }, 2000);
     })
 });
