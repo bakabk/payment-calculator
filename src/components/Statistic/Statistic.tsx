@@ -4,6 +4,7 @@ import {useHistory} from "react-router-dom";
 
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {
+    deleteDataAsync,
     fetchDataAsync,
     allRentData,
     IMetersData,
@@ -33,7 +34,8 @@ const collumnsMap = {
     serviceRentPrice: "Ком услуги",
     total: "Всего",
     edit: "Изменить",
-    copy: "Копировать"
+    copy: "Копировать",
+    delete: "Удалить"
 };
 
 interface ICollumnsMap {
@@ -70,6 +72,9 @@ const prepareRow = (index: number, data: Array<IMetersData>): IPreparedData => {
             case 'total':
                 acc[cellType] = acc.waterCost! + acc.electricityCost! + acc.gasPrice! + acc.rentPrice!;
                 break;
+            case 'delete':
+                acc[cellType] = currentMonthData._id;
+                break
             case 'edit':
             case 'copy':
                 acc[cellType] = '';
@@ -173,6 +178,16 @@ const Statistic: React.FC = () => {
         }
     }
 
+    const handleDeleteData = (event: React.MouseEvent<HTMLElement, MouseEvent>): void => {
+        if (event?.target instanceof HTMLElement) {
+            const id: string = event.target.dataset.id!;
+
+            if (window.confirm(`Вы действительно хотите удалить запись ${id}`)) {
+                dispatch(deleteDataAsync(id));
+            }
+        }
+    }
+
     const handleCellRenderer = (cellRenderProps: any): any => {
         switch (cellRenderProps.dataKey) {
             case 'date':
@@ -193,6 +208,14 @@ const Statistic: React.FC = () => {
                 >
                     copy
                 </button> : null; //подумать о правильном отображении за 1 месяц
+            case 'delete':
+                return cellRenderProps.rowIndex ? <button
+                    className='statistic-table__cell_button'
+                    data-id={cellRenderProps.cellData}
+                    onClick={handleDeleteData}
+                >
+                    delete
+                </button> : null;
             default:
                 return cellRenderProps.cellData;
         }

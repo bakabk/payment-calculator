@@ -57,3 +57,14 @@ app.post('/api/add', jsonParser, (req, res) => {
         res.send(data);
     })
 });
+
+app.delete('/api/delete/:id', jsonParser, (req, res) => {
+    if (!req.body) return res.sendStatus(400);
+
+    const id = req.params.id;
+
+    monthPayment.findByIdAndDelete(id, (err, data) => {
+        if (err) return console.log(err);
+        res.send(data);
+    })
+});

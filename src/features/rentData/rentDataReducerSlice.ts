@@ -71,7 +71,11 @@ export const fetchDataAsync = createAsyncThunk(
     async () => fetchData({apiPath: 'data'})
 );
 
-//DELETE
+export const deleteDataAsync = createAsyncThunk(
+    'deleteData',
+    async (id: string) => fetchData({apiPath: `delete/${id}`, apiMethod: 'DELETE'})
+)
+
 //PATCH
 
 export const addDataAsync = createAsyncThunk(
@@ -112,6 +116,13 @@ export const rentDataSlice = createSlice({
                 state.isPending = true;
             })
             .addCase(addDataAsync.fulfilled, (state, action) => {
+                state.isPending = false;
+                state.data = [];
+            })
+            .addCase(deleteDataAsync.pending, (state) => {
+                state.isPending = true;
+            })
+            .addCase(deleteDataAsync.fulfilled, (state, action) => {
                 state.isPending = false;
                 state.data = [];
             })
