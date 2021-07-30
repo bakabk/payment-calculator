@@ -36,13 +36,12 @@ const initialState: IRentData = {
 
 type fetchPropsType = {
     apiPath: string
-    apiMethod?: string,
+    method?: string,
     data?: any
 }
 
 const fetchData = async (props: fetchPropsType): Promise<any> => {
-    const {apiPath, apiMethod, data} = props;
-    const method = apiMethod || 'GET';
+    const {apiPath, method, data} = props;
     let error = 'что-то пошло не так';
 
     try {
@@ -68,36 +67,28 @@ const fetchData = async (props: fetchPropsType): Promise<any> => {
 
 export const fetchDataAsync = createAsyncThunk(
     'fetchData',
-    async () => fetchData({apiPath: 'data'})
+    async () => fetchData({apiPath: 'data', method: 'GET'})
 );
 
 export const deleteDataAsync = createAsyncThunk(
     'deleteData',
-    async (id: string) => fetchData({apiPath: `delete/${id}`, apiMethod: 'DELETE'})
+    async (id: string) => fetchData({apiPath: `delete/${id}`, method: 'DELETE'})
 )
 
-//PATCH
+export const updateDataAsync = createAsyncThunk(
+    'updateData',
+    async (data: any) => fetchData({apiPath: `update/${data.id}`, method: 'PATCH', data})
+)
 
 export const addDataAsync = createAsyncThunk(
     'addData',
-    async (data: IMetersData) => fetchData({apiPath: 'add', apiMethod: 'POST', data})
+    async (data: IMetersData) => fetchData({apiPath: 'add', method: 'POST', data})
 )
 
 export const rentDataSlice = createSlice({
     name: 'rentData',
     initialState,
-    reducers: {
-        editData: (state: IRentData, action: PayloadAction<IMetersData>) => {
-            const elementId = state.data.reduce((result: null | number, monthRent: IMetersData, i: number) => {
-                if (result !== null) return result;
-                return action.payload.id === monthRent.id ? i : null;
-            }, null);
-
-            if (elementId !== null) {
-                state.data[elementId] = action.payload;
-            }
-        }
-    },
+    reducers: {},
     extraReducers: (builder) => {
         builder
             .addCase(fetchDataAsync.pending, (state) => {
@@ -126,10 +117,15 @@ export const rentDataSlice = createSlice({
                 state.isPending = false;
                 state.data = [];
             })
+            .addCase(updateDataAsync.pending, (state) => {
+                state.isPending = true;
+            })
+            .addCase(updateDataAsync.fulfilled, (state, action) => {
+                state.isPending = false;
+                state.data = [];
+            })
     }
 })
-
-export const {editData} = rentDataSlice.actions;
 
 export const allRentData = (state: RootState) => state.rentData;
 

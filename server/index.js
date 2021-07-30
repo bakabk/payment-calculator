@@ -68,3 +68,15 @@ app.delete('/api/delete/:id', jsonParser, (req, res) => {
         res.send(data);
     })
 });
+
+app.patch("/api/update/:id", jsonParser, function(req, res){
+    if(!req.body) return res.sendStatus(400);
+
+    const id = req.body.id;
+    const data = {...req.body};
+
+    monthPayment.findOneAndUpdate({id: id}, data, {new: true}, function(err, user){
+        if(err) return console.log(err);
+        res.send(user);
+    });
+});
