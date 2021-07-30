@@ -37,7 +37,7 @@ mongoose.connect('mongodb://localhost:27017/payment',{
         });
 });
 
-app.get('/api/data/', (req, res) => {
+app.get('/api/data', (req, res) => {
     monthPayment.find({}, (err, data) => {
         if (err) return console.warn(err);
         setTimeout(() => {
@@ -47,7 +47,7 @@ app.get('/api/data/', (req, res) => {
     })
 });
 
-app.post('/api/add/', jsonParser, (req, res) => {
+app.post('/api/add', jsonParser, (req, res) => {
     if (!req.body) return res.sendStatus(400);
 
     const data = new monthPayment({...req.body});
